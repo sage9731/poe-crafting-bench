@@ -1,0 +1,53 @@
+.game-install-path {
+    padding: 12px 16px;
+
+    &-tip {
+        margin: 16px 0 48px 0;
+        color: #333;
+    }
+
+    .game-client-list {
+        display: flex;
+        gap: 16px;
+        justify-content: space-between;
+
+        &-item {
+            cursor: pointer;
+            box-sizing: border-box;
+            width: 100px;
+            height: 100px;
+            padding: 10px;
+            border-radius: 4px;
+
+            img {
+                width: 80px;
+                height: 80px;
+                object-fit: contain;
+            }
+
+            &:hover {
+                background: #eee;
+            }
+
+            &--disable {
+                cursor: not-allowed;
+            }
+
+            &--active {
+                outline: 3px solid #1677FF !important;
+            }
+
+            &-label {
+                margin-top: 8px;
+                text-align: center;
+            }
+        }
+
+        .divider {
+            min-height: 0;
+            margin: 16px 0;
+            width: 2px;
+            background-color: #eee;
+        }
+    }
+}
