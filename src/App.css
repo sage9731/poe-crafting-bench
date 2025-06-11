@@ -36,10 +36,12 @@ html, body, #root {
             line-height: 32px;
             color: transparent;
             user-select: none;
+
             font-style: italic;
+            font-family: "FontinSmallCaps", Verdana, Arial, Helvetica, sans-serif;
 
             &:hover {
-                color: #ccc;
+                color: #af6025;
             }
         }
     }

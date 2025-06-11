@@ -113,7 +113,7 @@ function App() {
                         >
                             跳过
                         </Button>
-                    ) : <div className="secret" onClick={onSecretClick}>永远相信美好的事情即将发生</div>
+                    ) : <div className="secret" onClick={onSecretClick}>你的血管里奔流着力量之河。</div>
                 }
                 <Button
                     type="primary"
