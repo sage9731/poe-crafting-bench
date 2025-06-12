@@ -5,12 +5,15 @@ import { useCallback, useMemo, useState } from "react";
 import { StepProps } from "antd/es/steps";
 import GameInstallPath from "@/components/GameInstallPath";
 import { useLocalStorageState } from "ahooks";
+import PatchPath from "@/components/PatchPath";
+import { isEmpty } from 'lodash';
 
 interface CustomStepProps extends StepProps {
-    key: 'position' | 'patch' | 'font' | 'enhance' | 'execute'
+    key: 'path' | 'patch' | 'font' | 'enhance' | 'execute'
 }
 
 function App() {
+    const [execParam, setExecParam] = useState<ExecParam>({ path: '' });
     const [currentStep, setCurrentStep] = useState<number>(0);
     const [secretClickTimes, setSecretClickTimes] = useState(0);
     const [enhanceEnabled, setEnhanceEnabled] = useLocalStorageState<boolean>('enhanceEnabled', {
@@ -21,7 +24,7 @@ function App() {
     const steps: CustomStepProps[] = useMemo(() => {
         const steps: CustomStepProps[] = [
             {
-                key: 'position',
+                key: 'path',
                 title: '选择游戏目录',
                 icon: <FolderOpenOutlined/>
             },
@@ -84,6 +87,12 @@ function App() {
         }
     }, [enhanceEnabled, secretClickTimes]);
 
+    const setExecParamField = useCallback((key: string, value: any) => {
+        setExecParam(prev => ({
+            ...prev,
+            [key]: value,
+        }))
+    }, []);
 
     return (
         <div className='App'>
@@ -95,8 +104,14 @@ function App() {
                 />
             </div>
             <div className="body">
-                <GameInstallPath visible={currentStepKey === 'position'} onChange={() => {
-                }}/>
+                <GameInstallPath
+                    visible={currentStepKey === 'path'}
+                    onChange={path => setExecParamField('path', path)}
+                />
+                <PatchPath
+                    visible={currentStepKey === 'patch'}
+                    onChange={patch => setExecParamField('patch', patch)}
+                />
             </div>
             <div className="footer">
                 <Button
@@ -118,6 +133,7 @@ function App() {
                 <Button
                     type="primary"
                     onClick={onNext}
+                    disabled={currentStepKey === 'path' && isEmpty(execParam.path)}
                 >
                     {currentStep <= steps.length - 2 ? '下一步' : '执行'}
                 </Button>

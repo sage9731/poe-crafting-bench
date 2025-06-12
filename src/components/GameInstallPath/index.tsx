@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import classNames from "classnames";
 import { Button, Flex, Input, Tooltip } from "antd";
 import WeGameIcon from '../../assets/wegame.png';
@@ -8,10 +8,12 @@ import EpicIcon from '../../assets/Epic.ico';
 import PathOfExile1Icon from '../../assets/PathOfExile1.ico';
 import PathOfExile2Icon from '../../assets/PathOfExile2.ico';
 import './index.css';
+import { isEmpty } from "lodash";
+import { useLatest } from "ahooks";
 
 interface GameInstallPathProps {
     visible: boolean
-    onChange: (gameInstallPath: string) => void
+    onChange: (path: string) => void
 }
 
 const gameVersions = [
@@ -60,24 +62,46 @@ function GameInstallPath(
         onChange,
     }: GameInstallPathProps
 ) {
-    const [gameInstallPath, setGameInstallPath] = useState<string>();
+    const [path, setPath] = useState<string>();
     const [version, setVersion] = useState<number>();
-    const [gamePlatform, setGamePlatform] = useState<string>();
+    const [platform, setPlatform] = useState<string>();
+    const onChangeRef = useLatest(onChange);
 
     const onManualChoose = useCallback(() => {
-        window.ipcRenderer.invoke('open-game-file-dialog').then(res => {
-            setGameInstallPath(res);
+        window.ipcRenderer.invoke('open-game-file-dialog').then(path => {
+            if (!isEmpty(path)) {
+                setPath(path);
+            }
         })
     }, []);
+
+    useEffect(() => {
+        if (version && platform) {
+            window.ipcRenderer.invoke('get-game-install-path', { version, platform }).then(path => {
+                if (!isEmpty(path)) {
+                    setPath(path.trim());
+                }
+            })
+        }
+    }, [version, platform]);
+
+    useEffect(() => {
+        if (path && path.trim()) {
+            const lowerPath = path.toLowerCase().trim();
+            if (lowerPath.endsWith('.ggpk') || lowerPath.endsWith('.bin')) {
+                onChangeRef.current(path);
+            }
+        }
+    }, [path])
 
     return (
         <div className={classNames("game-install-path", { 'hidden': !visible })}>
             <Flex gap={12} align="center">
                 <Flex flex={1}>
                     <Input
-                        value={gameInstallPath}
-                        onChange={(e) => setGameInstallPath(e.target.value)}
-                        placeholder="请选择游戏根目录 Content.ggpk 或 Bundles2\_.index.bin"
+                        value={path}
+                        onChange={(e) => setPath(e.target.value)}
+                        placeholder="请选择游戏根目录的 Content.ggpk 或 Bundles2\_.index.bin"
                     />
                 </Flex>
                 <Button type="primary" onClick={onManualChoose}>手动选择</Button>
@@ -105,10 +129,10 @@ function GameInstallPath(
                         <div
                             key={value}
                             className={classNames("game-client-list-item", {
-                                "game-client-list-item--active": value === gamePlatform,
+                                "game-client-list-item--active": value === platform,
                                 "game-client-list-item--disable": !supported
                             })}
-                            onClick={() => supported && setGamePlatform(value)}
+                            onClick={() => supported && setPlatform(value)}
                         >
                             <Tooltip title={supported ? label : '暂不支持自动检测该平台的游戏安装目录，请手动选择'}>
                                 <img src={icon} alt=""/>

@@ -1,6 +1,6 @@
 {
   "$schema": "https://raw.githubusercontent.com/electron-userland/electron-builder/master/packages/app-builder-lib/scheme.json",
-  "appId": "YourAppID",
+  "appId": "poe.bench",
   "asar": true,
   "directories": {
     "output": "release/${version}"
@@ -8,6 +8,13 @@
   "files": [
     "dist-electron",
     "dist"
+  ],
+  "extraResources": [
+    {
+      "from": "bin",
+      "to": "bin",
+      "filter": ["**/*"]
+    }
   ],
   "mac": {
     "artifactName": "${productName}_${version}.${ext}",

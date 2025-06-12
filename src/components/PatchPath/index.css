@@ -1,0 +1,43 @@
+.patch-path {
+    padding: 12px 16px;
+    height: calc(100% - 32px);
+    display: flex;
+
+
+    .patch-drop-area {
+        width: 50%;
+        height: calc(100% - 50px);
+        cursor: pointer;
+        padding: 24px;
+        border: 1px dashed #ccc;
+        border-radius: 20px;
+        text-align: center;
+
+        &-icon {
+            font-size: 64px;
+            color: #ccc;
+        }
+
+        &-text {
+            margin: 8px 0;
+            color: #333;
+        }
+
+        &-hint {
+            color: #666;
+
+            > p {
+                font-size: 14px;
+            }
+        }
+    }
+
+    .patch-drop-area--highlight {
+        border-color: #1677FF;
+    }
+
+    .patch-list {
+        width: 50%;
+        overflow-y: scroll;
+    }
+}

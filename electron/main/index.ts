@@ -4,25 +4,19 @@ import { fileURLToPath } from 'node:url'
 import path from 'node:path'
 import os from 'node:os'
 import { update } from './update'
+import * as process from "node:process";
+import { exec } from 'child_process';
 
 const require = createRequire(import.meta.url)
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
-// The built directory structure
-//
-// ├─┬ dist-electron
-// │ ├─┬ main
-// │ │ └── index.js    > Electron-Main
-// │ └─┬ preload
-// │   └── index.mjs   > Preload-Scripts
-// ├─┬ dist
-// │ └── index.html    > Electron-Renderer
-//
 process.env.APP_ROOT = path.join(__dirname, '../..')
-
 export const MAIN_DIST = path.join(process.env.APP_ROOT, 'dist-electron')
 export const RENDERER_DIST = path.join(process.env.APP_ROOT, 'dist')
 export const VITE_DEV_SERVER_URL = process.env.VITE_DEV_SERVER_URL
+export const IS_DEV = !!VITE_DEV_SERVER_URL;
+const RESOURCE_FOLDER = IS_DEV ? process.env.APP_ROOT : path.dirname(process.env.APP_ROOT);
+const POE_BENCH_EXE = `${RESOURCE_FOLDER}/bin/PoeBench.exe`;
 
 process.env.VITE_PUBLIC = VITE_DEV_SERVER_URL
     ? path.join(process.env.APP_ROOT, 'public')
@@ -52,12 +46,9 @@ async function createWindow() {
         resizable: false,
         webPreferences: {
             preload,
-            // Warning: Enable nodeIntegration and disable contextIsolation is not secure in production
-            // nodeIntegration: true,
-
-            // Consider using contextBridge.exposeInMainWorld
-            // Read more on https://www.electronjs.org/docs/latest/tutorial/context-isolation
-            // contextIsolation: false,
+            contextIsolation: true, // 必须启用上下文隔离
+            nodeIntegration: false, // 禁用 Node.js 集成
+            sandbox: true // 启用沙箱
         },
     })
 
@@ -136,7 +127,7 @@ app.on('activate', () => {
     }
 })
 
-// New window example arg: new windows url
+
 ipcMain.handle('open-game-file-dialog', async (_, arg) => {
     if (win) {
         const result = await dialog.showOpenDialog(win, {
@@ -154,4 +145,40 @@ ipcMain.handle('open-game-file-dialog', async (_, arg) => {
         return result.filePaths[0];
     }
     return null;
-})
+});
+
+ipcMain.handle('open-patch-file-dialog', async (_, arg) => {
+    if (win) {
+        const result = await dialog.showOpenDialog(win, {
+            title: '选择补丁',
+            filters: [
+                {
+                    name: '压缩包',
+                    extensions: ['zip'],
+                }
+            ],
+            properties: ['openFile', 'multiSelections']
+        });
+        if (result.canceled) {
+            return null;
+        }
+        return result.filePaths;
+    }
+    return null;
+});
+
+ipcMain.handle('get-game-install-path', async(_, arg) => {
+    console.log(arg);
+    const { version, platform } = arg;
+    const command = `chcp 65001 >nul && "${POE_BENCH_EXE}" get-game-install-path --version ${version} --platform ${platform}`;
+    return await new Promise<string>(resolve => {
+        console.log('command', command)
+        exec(command, (error, stdout, stderr) => {
+            if (stdout) {
+                resolve(stdout);
+            } else {
+                resolve('');
+            }
+        })
+    });
+});
