@@ -120,16 +120,7 @@ function App() {
                 >
                     上一步
                 </Button>
-                {
-                    currentStep > 0 && currentStep < steps.length - 1 ? (
-                        <Button
-                            disabled={currentStep === 0}
-                            onClick={() => setCurrentStep(prev => prev + 1)}
-                        >
-                            跳过
-                        </Button>
-                    ) : <div className="secret" onClick={onSecretClick}>你的血管里奔流着力量之河。</div>
-                }
+                <div className="secret" onClick={onSecretClick}>你的血管里奔流着力量之河。</div>
                 <Button
                     type="primary"
                     onClick={onNext}

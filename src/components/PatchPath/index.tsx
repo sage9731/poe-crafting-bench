@@ -1,12 +1,31 @@
-import React, { DragEvent, useCallback, useRef, useState } from 'react';
+import React, { DragEvent, useCallback, useEffect, useRef, useState } from 'react';
 import classNames from "classnames";
 import './index.css';
-import { InboxOutlined } from "@ant-design/icons";
+import { DeleteOutlined, DragOutlined, HolderOutlined, InboxOutlined } from "@ant-design/icons";
 import { isEmpty, uniq } from "lodash";
+import {
+    SortableContainer,
+    SortableElement,
+    SortableHandle,
+    SortEnd,
+    SortEndHandler,
+} from "react-sortable-hoc";
+import { arrayMoveMutable } from "array-move";
+import { Button, Empty, message, Tooltip } from "antd";
+import { useUpdate } from "ahooks";
 
 interface PatchPathProps {
     visible: boolean
     onChange: (patchPaths: string[]) => void
+}
+
+interface SortableListProps {
+    items: string[]
+}
+
+interface SortableItemProps {
+    value: string
+    index: number
 }
 
 function PatchPath(
@@ -18,11 +37,20 @@ function PatchPath(
     const [paths, setPaths] = useState<string[]>([]);
     const [isDragging, setIsDragging] = useState(false)
     const dragCounter = useRef<number>(0);
+    const onChangeRef = useRef(onChange);
+    const helperContainer = useRef<HTMLDivElement>(null);
 
     const onDropAreaClick = useCallback(() => {
         window.ipcRenderer.invoke('open-patch-file-dialog').then(paths => {
             if (!isEmpty(paths)) {
-                setPaths(prev => uniq([...prev, ...paths]));
+                setPaths(prev => {
+                    const arr = uniq([...prev, ...paths]);
+                    if (arr.length >= 8) {
+                        arr.length = 8;
+                        message.error('最多支持同时添加 8 个补丁').then();
+                    }
+                    return arr;
+                });
             }
         });
     }, []);
@@ -67,11 +95,61 @@ function PatchPath(
         const droppedFiles = e.dataTransfer.files;
         if (droppedFiles.length) {
             const filesArray = Array.from(droppedFiles);
-            console.log(filesArray)
             const paths = filesArray.map(file => window.ipcRenderer.getFilePath(file)).filter(path => path.toLowerCase().endsWith('.zip'));
-            setPaths(prev => uniq([...prev, ...paths]));
+            setPaths(prev => {
+                const arr = uniq([...prev, ...paths]);
+                if (arr.length >= 8) {
+                    arr.length = 8;
+                    message.error('最多支持同时添加 8 个补丁').then();
+                }
+                return arr;
+            });
         }
     }, []);
+
+    const onDelete = useCallback((value: string) => {
+        setPaths(prev => prev.filter(path => path !== value));
+    }, []);
+
+    const DragHandler = SortableHandle(() => (
+        <HolderOutlined/>
+    ))
+
+    const SortableItem = SortableElement<SortableItemProps>(({ value }: SortableItemProps) => (
+        <Tooltip placement="left" title={value}>
+            <div className="patch-list-item">
+                <DragHandler/>
+                <div className="patch-list-item-title">
+                    {getFileName(value)}
+                </div>
+                <div className="patch-list-item-action">
+                    <Button type="link" danger icon={<DeleteOutlined/>} onClick={(e) => onDelete(value)}/>
+                </div>
+            </div>
+        </Tooltip>
+    ));
+
+    const SortableList = SortableContainer<SortableListProps>(({ items }: SortableListProps) => (
+        <div className="patch-list" ref={helperContainer}>
+            <div className="patch-list-title">待安装补丁</div>
+            {
+                items.map((item, index) => <SortableItem key={item} value={item} index={index}/>)
+            }
+            {
+                items.length === 0 && (
+                    <Empty className="mt-4" description="无数据"/>
+                )
+            }
+        </div>
+    ));
+
+    const onSortEnd = useCallback(({ oldIndex, newIndex }: SortEnd) => {
+        arrayMoveMutable(paths, oldIndex, newIndex)
+    }, [paths]);
+
+    useEffect(() => {
+        onChangeRef.current(paths || []);
+    }, [paths]);
 
     return (
         <div className={classNames('patch-path', { 'hidden': !visible })}>
@@ -87,7 +165,7 @@ function PatchPath(
                     <InboxOutlined/>
                 </div>
                 <div className="patch-drop-area-text">
-                    点击 或 拖放压缩包到 此区域来添加待安装补丁
+                    点击 或 拖放压缩包到 此区域来添加补丁
                 </div>
                 <div className="patch-drop-area-hint">
                     <p>支持一个或多个补丁安装</p>
@@ -95,11 +173,20 @@ function PatchPath(
                     <p>一般来说，功能补丁需要放在第一位，其他补丁随意</p>
                 </div>
             </div>
-            <div className="patch-list">
-                {JSON.stringify(paths)}
-            </div>
+            <SortableList
+                items={paths}
+                helperClass="dragging"
+                axis="y"
+                onSortEnd={onSortEnd}
+                useDragHandle
+                helperContainer={() => helperContainer.current || document.body}
+            />
         </div>
     );
+}
+
+function getFileName(filePath: string) {
+    return filePath.split('\\').pop();
 }
 
 export default PatchPath;
