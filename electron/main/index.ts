@@ -6,7 +6,9 @@ import os from 'node:os'
 import { update } from './update'
 import * as process from "node:process";
 import { exec, spawn } from 'child_process';
-import { a9 } from "vitest/dist/chunks/reporters.nr4dxCkA";
+import * as fs from "node:fs";
+
+const nodePath = path;
 
 const require = createRequire(import.meta.url)
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
@@ -200,8 +202,30 @@ ipcMain.handle('open-external', (_, url: string): void => {
 })
 
 ipcMain.handle('patch', async (_, arg: ExecParam) => {
+    let { path, patch = [], font, fontSizeDelta, removeMinimapFog, cameraZoom } = arg;
+    // 判断是不是国服，国服版本号是否与补丁版本号一致
+    try {
+        const functionPatch = patch.find(p => p.includes('功能补丁'));
+        if (functionPatch && path.toLowerCase().endsWith('content.ggpk')) {
+            const xml = nodePath.dirname(path) + "/TCLS/mmog_data.xml";
+            const data = fs.readFileSync(xml, 'utf8');
+            const regex = /<VersionData>[\s\S]*?<Version>([\s\S]*?)<\/Version>/i;
+            const match = data.match(regex);
+            if (match) {
+                const version = match[1];
+                if (!functionPatch.includes(version)) {
+                    win?.webContents.send('execute-log', `错误：游戏客户端版本号 ${version} 与 功能补丁版本号不一致，是过期补丁，已跳过。`);
+                    const fileName = functionPatch.split('\\').pop();
+                    win?.webContents.send('execute-log', `过期补丁名称: ${fileName}`);
+                    patch = patch.filter(p => p !== functionPatch);
+                }
+            }
+        }
+    } catch (e) {
+        console.error(e);
+    }
+    //
     let command = `chcp 65001 >nul && "${POE_BENCH_EXE}" patch`;
-    const { path, patch, font, fontSizeDelta, removeMinimapFog, cameraZoom } = arg;
     command += ` -p "${path}"`;
     if (patch && patch.length > 0) {
         patch.forEach(p => {
@@ -220,7 +244,6 @@ ipcMain.handle('patch', async (_, arg: ExecParam) => {
     if (cameraZoom !== undefined) {
         command += ' --camera-zoom ' + cameraZoom;
     }
-    console.log('exec ', command);
     return await new Promise<any>(resolve => {
         const child = spawn(command, [], {
             stdio: 'pipe', // 建立管道（默认值）
