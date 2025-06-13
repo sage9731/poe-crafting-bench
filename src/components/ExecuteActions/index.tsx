@@ -1,4 +1,4 @@
-import React, { forwardRef, useCallback, useEffect, useImperativeHandle, useState } from 'react';
+import React, { forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState } from 'react';
 import { Button, message, Modal } from "antd";
 import classNames from "classnames";
 import { isEmpty } from "lodash";
@@ -21,12 +21,18 @@ const ExecuteActions = forwardRef<ExecuteActionsHandler, ExecuteActionsProps>((
     },
     ref
 ) => {
+    const logRef = useRef<HTMLDivElement>(null);
     const [, setLastExecParam] = useLastExecParam();
     const [executeLog, setExecuteLog] = useState<string>('');
 
     useEffect(() => {
         const listener = (event: any, data: string) => {
-            setExecuteLog(prev => prev + data + '\n');
+            setExecuteLog(prev => prev + data.trim() + '\n');
+            setTimeout(() => {
+                if (logRef.current) {
+                    logRef.current.scrollTop = logRef.current.scrollHeight;
+                }
+            }, 100);
         };
         window.ipcRenderer.on('execute-log', listener);
         return () => {
@@ -43,11 +49,17 @@ const ExecuteActions = forwardRef<ExecuteActionsHandler, ExecuteActionsProps>((
             }
             Modal.confirm({
                 title: '确认执行',
-                content: '开始执行后请等待执行结果，提前关闭本工具可能导致游戏客户端损坏',
-                okText: '确认',
+                content: (
+                    <div>
+                        <p>1. 请确认游戏客户端和其他可能读取游戏文件的工具已关闭</p>
+                        <p>2. 开始执行后请耐心等待执行结果，提前关闭本工具可能导致游戏客户端损坏</p>
+                    </div>
+                ),
+                okText: '继续',
                 cancelText: '取消',
                 onOk: () => {
                     onExecutingChange(true);
+                    setExecuteLog('');
                     window.ipcRenderer.invoke('patch', execParam).then(code => {
                         setLastExecParam(execParam);
                         if (code === 0) {
@@ -75,9 +87,7 @@ const ExecuteActions = forwardRef<ExecuteActionsHandler, ExecuteActionsProps>((
                     <div>2. 任何修改游戏本体的操作都有可能导致封号，由此造成的后果请自行承担</div>
                     <div>3. 本工具不包含任何恶意行为，例如窃取账号信息、盗号等。不放心的朋友可以阅读源码确认安全后自行编译打包使用
                     </div>
-                    <div>4. 如果执行后，遇到Content.ggpk/_.index.bin损坏，可以切到选择游戏目录步骤，使用右下角的修补功能
-                    </div>
-                    <div>5. 继续使用本工具代表同意此声明</div>
+                    <div>4. 继续使用本工具代表同意此声明</div>
                 </div>
             </div>
             <div className="execute-result">
@@ -85,7 +95,7 @@ const ExecuteActions = forwardRef<ExecuteActionsHandler, ExecuteActionsProps>((
                     <span>日志</span>
                     <Button type="link">复制</Button>
                 </div>
-                <div className="execute-log">{executeLog}</div>
+                <div className="execute-log" ref={logRef}>{executeLog}</div>
             </div>
         </div>
     );

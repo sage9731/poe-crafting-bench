@@ -158,10 +158,12 @@ function App() {
             </div>
             <div className="footer">
                 <Button
-                    disabled={currentStep === 0 || executing}
+                    // type={currentStep === 0 ? 'primary' : undefined}
+                    disabled={executing || currentStep === 0}
                     onClick={() => setCurrentStep(prev => prev - 1)}
                 >
                     上一步
+                    {/*{ currentStep === 0 ? '修补' : '上一步' }*/}
                 </Button>
                 <div className="secret" onClick={onSecretClick}>你的血管里奔流着力量之河。</div>
                 <Button

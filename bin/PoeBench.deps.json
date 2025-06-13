@@ -11,8 +11,8 @@
           "LibGGPK3.LibBundle3": "2.6.10",
           "LibGGPK3.LibBundledGGPK3": "2.6.10",
           "LibGGPK3.LibGGPK3": "2.6.10",
-          "Microsoft.DotNet.ILCompiler": "8.0.13",
-          "Microsoft.NET.ILLink.Tasks": "8.0.13",
+          "Microsoft.DotNet.ILCompiler": "8.0.11",
+          "Microsoft.NET.ILLink.Tasks": "8.0.11",
           "Microsoft.SourceLink.GitHub": "8.0.0",
           "System.CommandLine": "2.0.0-beta4.22272.1",
           "System.Drawing.Common": "10.0.0-preview.5.25277.114",
@@ -33,8 +33,8 @@
         }
       },
       "Microsoft.Build.Tasks.Git/8.0.0": {},
-      "Microsoft.DotNet.ILCompiler/8.0.13": {},
-      "Microsoft.NET.ILLink.Tasks/8.0.13": {},
+      "Microsoft.DotNet.ILCompiler/8.0.11": {},
+      "Microsoft.NET.ILLink.Tasks/8.0.11": {},
       "Microsoft.SourceLink.Common/8.0.0": {},
       "Microsoft.SourceLink.GitHub/8.0.0": {
         "dependencies": {
@@ -132,7 +132,7 @@
         },
         "runtime": {
           "LibBundle3.dll": {
-            "assemblyVersion": "2.6.10.0",
+            "assemblyVersion": "2.6.10",
             "fileVersion": "2.6.10.0"
           }
         }
@@ -144,7 +144,7 @@
         },
         "runtime": {
           "LibBundledGGPK3.dll": {
-            "assemblyVersion": "2.6.10.0",
+            "assemblyVersion": "2.6.10",
             "fileVersion": "2.6.10.0"
           }
         }
@@ -155,7 +155,7 @@
         },
         "runtime": {
           "LibGGPK3.dll": {
-            "assemblyVersion": "2.6.10.0",
+            "assemblyVersion": "2.6.10",
             "fileVersion": "2.6.10.0"
           }
         }
@@ -206,19 +206,19 @@
       "path": "microsoft.build.tasks.git/8.0.0",
       "hashPath": "microsoft.build.tasks.git.8.0.0.nupkg.sha512"
     },
-    "Microsoft.DotNet.ILCompiler/8.0.13": {
+    "Microsoft.DotNet.ILCompiler/8.0.11": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-CCIhseY9KUJDIYKt7qD1IRLQA6Hr/8Dky31KS6UrM2sFyaFUb2JLagT0Uy2BiSf1i1Qy3nPjRb0zc1JFogOi9w==",
-      "path": "microsoft.dotnet.ilcompiler/8.0.13",
-      "hashPath": "microsoft.dotnet.ilcompiler.8.0.13.nupkg.sha512"
+      "sha512": "sha512-9SWRKJzFrE07m77G/9jSR1lqdlPmKCsQX1UflZEFBGYzmOZ53sjLEEcAiWtnWY0QJ750h2ahciOPO8oVjztQ0g==",
+      "path": "microsoft.dotnet.ilcompiler/8.0.11",
+      "hashPath": "microsoft.dotnet.ilcompiler.8.0.11.nupkg.sha512"
     },
-    "Microsoft.NET.ILLink.Tasks/8.0.13": {
+    "Microsoft.NET.ILLink.Tasks/8.0.11": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-R19ZTaRiQAK+xo9ZwaHbF/1vb1wwR1Wn5+sqp9v8+CDjbdS8R6qftKdw0VSXWKm7VAMi7P+NCU4zxDzhEWcAwQ==",
-      "path": "microsoft.net.illink.tasks/8.0.13",
-      "hashPath": "microsoft.net.illink.tasks.8.0.13.nupkg.sha512"
+      "sha512": "sha512-zk5lnZrYJgtuJG8L4v17Ej8rZ3PUcR2iweNV08BaO5LbYHIi2wNaVNcJoLxvqgQdnjLlKnCCfVGLDr6QHeAarQ==",
+      "path": "microsoft.net.illink.tasks/8.0.11",
+      "hashPath": "microsoft.net.illink.tasks.8.0.11.nupkg.sha512"
     },
     "Microsoft.SourceLink.Common/8.0.0": {
       "type": "package",

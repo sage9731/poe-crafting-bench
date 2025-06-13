@@ -1,7 +1,7 @@
 import React, { DragEvent, useCallback, useEffect, useRef, useState } from 'react';
 import classNames from "classnames";
 import './index.css';
-import { DeleteOutlined, DragOutlined, HolderOutlined, InboxOutlined } from "@ant-design/icons";
+import { DeleteOutlined, HolderOutlined, InboxOutlined } from "@ant-design/icons";
 import { isEmpty, uniq } from "lodash";
 import {
     SortableContainer,
@@ -11,8 +11,6 @@ import {
 } from "react-sortable-hoc";
 import { arrayMoveMutable } from "array-move";
 import { Button, Empty, message, Tooltip } from "antd";
-import useLastExecParam from "@/hooks/useLastExecParam";
-import { useMount } from "ahooks";
 
 interface PatchPathProps {
     visible: boolean

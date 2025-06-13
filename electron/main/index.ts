@@ -222,8 +222,20 @@ ipcMain.handle('patch', async (_, arg: ExecParam) => {
     }
     console.log('exec ', command);
     return await new Promise<any>(resolve => {
-        const child = spawn(command);
-        child.on('close', code => resolve(code));
+        const child = spawn(command, [], {
+            stdio: 'pipe', // 建立管道（默认值）
+            shell: true,   // 在 shell 中执行（处理路径空格等）
+            windowsHide: true // 隐藏 Windows 子进程控制台窗口（可选）
+        });
+        child.stdout.setEncoding('utf8');
+        child.stderr.setEncoding('utf8');
+        child.on('close', code => {
+            resolve(code)
+        });
+        child.on('error', (err) => {
+            win?.webContents.send('execute-log', `启动子进程失败: ${err.message}`);
+            resolve(-1);
+        });
         child.stdout.on('data', data => {
             win?.webContents.send('execute-log', data);
         });
