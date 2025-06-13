@@ -1,9 +1,8 @@
-import React, { forwardRef, useEffect, useImperativeHandle, useState } from 'react';
+import React, { forwardRef, useCallback, useEffect, useImperativeHandle, useState } from 'react';
 import { Button, message, Modal } from "antd";
 import classNames from "classnames";
 import { isEmpty } from "lodash";
 import './index.css';
-import { useLocalStorageState } from "ahooks";
 import useLastExecParam from "@/hooks/useLastExecParam";
 
 interface ExecuteActionsProps {
@@ -63,12 +62,16 @@ const ExecuteActions = forwardRef<ExecuteActionsHandler, ExecuteActionsProps>((
         }
     }), [])
 
+    const openGithub = useCallback(() => {
+        window.ipcRenderer.invoke('open-external', 'https://github.com/sage9731/poe-crafting-bench');
+    }, []);
+
     return (
         <div className={classNames('execute-actions', { 'hidden': !visible })}>
             <div className="disclaimer">
                 <div className="disclaimer-title">免责声明</div>
                 <div className="disclaimer-content">
-                    <div>1. 本工具开源免费，<a href="">开源地址</a></div>
+                    <div>1. 本工具开源免费，<a onClick={openGithub}>开源地址</a></div>
                     <div>2. 任何修改游戏本体的操作都有可能导致封号，由此造成的后果请自行承担</div>
                     <div>3. 本工具不包含任何恶意行为，例如窃取账号信息、盗号等。不放心的朋友可以阅读源码确认安全后自行编译打包使用
                     </div>

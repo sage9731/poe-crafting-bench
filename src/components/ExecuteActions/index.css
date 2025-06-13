@@ -16,6 +16,11 @@
         &-content {
             font-size: 14px;
             line-height: 2;
+
+            a {
+                cursor: pointer;
+                color: #1677FF;
+            }
         }
     }
 

@@ -1,4 +1,4 @@
-import { app, BrowserWindow, shell, ipcMain, Menu, dialog, ipcRenderer } from 'electron'
+import { app, BrowserWindow, shell, ipcMain, Menu, dialog } from 'electron'
 import { createRequire } from 'node:module'
 import { fileURLToPath } from 'node:url'
 import path from 'node:path'
@@ -168,7 +168,7 @@ ipcMain.handle('open-patch-file-dialog', async (_, arg) => {
     return null;
 });
 
-ipcMain.handle('get-game-install-path', async(_, arg) => {
+ipcMain.handle('get-game-install-path', async (_, arg) => {
     const { version, platform } = arg;
     const command = `chcp 65001 >nul && "${POE_BENCH_EXE}" get-game-install-path --version ${version} --platform ${platform}`;
     return await new Promise<string>(resolve => {
@@ -182,7 +182,7 @@ ipcMain.handle('get-game-install-path', async(_, arg) => {
     });
 });
 
-ipcMain.handle('get-installed-fonts', async(_, arg) => {
+ipcMain.handle('get-installed-fonts', async (_, arg) => {
     const command = `chcp 65001 >nul && "${POE_BENCH_EXE}" get-installed-fonts`;
     return await new Promise<string>(resolve => {
         exec(command, (error, stdout, stderr) => {
@@ -195,7 +195,11 @@ ipcMain.handle('get-installed-fonts', async(_, arg) => {
     });
 });
 
-ipcMain.handle('patch', async(_, arg: ExecParam) => {
+ipcMain.handle('open-external', (_, url: string): void => {
+    shell.openExternal(url);
+})
+
+ipcMain.handle('patch', async (_, arg: ExecParam) => {
     let command = `chcp 65001 >nul && "${POE_BENCH_EXE}" patch`;
     const { path, patch, font, fontSizeDelta, removeMinimapFog, cameraZoom } = arg;
     command += ' -p ' + path;
@@ -221,10 +225,10 @@ ipcMain.handle('patch', async(_, arg: ExecParam) => {
         const child = spawn(command);
         child.on('close', code => resolve(code));
         child.stdout.on('data', data => {
-            ipcRenderer.send('execute-log', data);
+            win?.webContents.send('execute-log', data);
         });
         child.stderr.on('data', data => {
-            ipcRenderer.send('execute-log', data);
+            win?.webContents.send('execute-log', data);
         })
     });
 });
