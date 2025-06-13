@@ -202,14 +202,14 @@ ipcMain.handle('open-external', (_, url: string): void => {
 ipcMain.handle('patch', async (_, arg: ExecParam) => {
     let command = `chcp 65001 >nul && "${POE_BENCH_EXE}" patch`;
     const { path, patch, font, fontSizeDelta, removeMinimapFog, cameraZoom } = arg;
-    command += ' -p ' + path;
+    command += ` -p "${path}"`;
     if (patch && patch.length > 0) {
         patch.forEach(p => {
-            command += ' -pf ' + p;
+            command += ` -pf "${p}"`;
         });
     }
     if (font) {
-        command += ' --font ' + font;
+        command += ` --font "${font}"`;
     }
     if (fontSizeDelta) {
         command += ' --font-size-delta ' + fontSizeDelta;

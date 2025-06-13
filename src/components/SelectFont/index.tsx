@@ -26,6 +26,8 @@ function SelectFont(
     const [fontSizeDelta, setFontSizeDelta] = useState<number>(0);
 
     useMount(() => {
+        getInstalledFonts();
+
         if (lastExecParam.font) {
             setFont(lastExecParam.font);
             onChangeRef.current({
@@ -36,7 +38,6 @@ function SelectFont(
     });
 
     const getInstalledFonts = useCallback(() => {
-        setFont('');
         window.ipcRenderer.invoke('get-installed-fonts').then((res: string[]) => {
             if (!isEmpty(res)) {
                 res.sort((a, b) => {
@@ -55,32 +56,6 @@ function SelectFont(
         });
     }, []);
 
-    useMount(() => {
-        getInstalledFonts();
-    });
-
-    const { run: scrollToFont } = useDebounceFn((keyword: string) => {
-        const index = fonts.findIndex(f => f.includes(keyword.toLowerCase().trim()));
-        if (index > -1) {
-            const fontListItem = document.querySelector(`#font-list-item_${index}`);
-            if (fontListItem) {
-                fontListItem.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                if (fontListRef.current) {
-                    fontListRef.current.scrollTo({ top: fontListRef.current.scrollTop - 14 })
-                }
-            }
-        } else {
-            if (fontListRef.current) {
-                fontListRef.current.scrollTo({ top: -10 })
-            }
-        }
-    }, { wait: 500 });
-
-    const onKeywordChange = useCallback((keyword: string) => {
-        setKeyword(keyword);
-        scrollToFont(keyword);
-    }, [scrollToFont]);
-
     useEffect(() => {
         if (onChangeRef.current) {
             onChangeRef.current({ font, fontSizeDelta });
@@ -94,7 +69,7 @@ function SelectFont(
                     <Input
                         placeholder="输入字体名称搜索"
                         value={keyword}
-                        onChange={(e) => onKeywordChange(e.target.value)}
+                        onChange={(e) => setKeyword(e.target.value)}
                         allowClear
                     />
                     <Button type="primary" onClick={() => getInstalledFonts()}>刷新列表</Button>
@@ -103,7 +78,7 @@ function SelectFont(
                     <Radio.Group value={font} onChange={e => setFont(e.target.value)}>
                         <Space direction="vertical">
                             {
-                                fonts.map((font, index) => (
+                                fonts.filter(f => !keyword || f.includes(keyword)).map((font, index) => (
                                     <Radio
                                         key={font}
                                         className="font-list-item"

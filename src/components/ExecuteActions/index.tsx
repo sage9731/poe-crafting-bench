@@ -93,7 +93,6 @@ const ExecuteActions = forwardRef<ExecuteActionsHandler, ExecuteActionsProps>((
             <div className="execute-result">
                 <div className="execute-result-title">
                     <span>日志</span>
-                    <Button type="link">复制</Button>
                 </div>
                 <div className="execute-log" ref={logRef}>{executeLog}</div>
             </div>
