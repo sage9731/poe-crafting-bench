@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import classNames from "classnames";
-import { Button, Flex, Input, Tooltip } from "antd";
+import { Button, Flex, Input, message, Tooltip } from "antd";
 import WeGameIcon from '../../assets/wegame.png';
 import GggIcon from '../../assets/ggg.png';
 import SteamIcon from '../../assets/steam.ico';
@@ -87,8 +87,10 @@ function GameInstallPath(
     useEffect(() => {
         if (version && platform) {
             window.ipcRenderer.invoke('get-game-install-path', { version, platform }).then(path => {
-                if (!isEmpty(path)) {
+                if (isEmpty(path)) {
                     setPath(path.trim());
+                } else {
+                    message.error('未能自动检测到游戏的安装目录，请手动选择').then();
                 }
             })
         }
@@ -115,7 +117,7 @@ function GameInstallPath(
                 </Flex>
                 <Button type="primary" onClick={onManualChoose}>手动选择</Button>
             </Flex>
-            <div className="game-install-path-tip">自动检测游戏安装目录：</div>
+            <div className="game-install-path-tip">选择版本和平台后自动检测游戏安装目录：(仅支持国服和国际服，Steam与Epic请手动选择)</div>
             <div className="game-client-list">
                 {
                     gameVersions.map(({ label, value, icon }) => (
@@ -141,9 +143,9 @@ function GameInstallPath(
                                 "game-client-list-item--active": value === platform,
                                 "game-client-list-item--disable": !supported
                             })}
-                            onClick={() => supported && setPlatform(value)}
+                            onClick={() => supported ? setPlatform(value) : onManualChoose()}
                         >
-                            <Tooltip title={supported ? label : '暂不支持自动检测该平台的游戏安装目录，请手动选择'}>
+                            <Tooltip title={supported ? label : '暂不支持自动检测该平台的游戏安装目录，点击进行手动选择'}>
                                 <img src={icon} alt=""/>
                             </Tooltip>
                         </div>
