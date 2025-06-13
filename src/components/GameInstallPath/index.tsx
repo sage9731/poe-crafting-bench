@@ -88,9 +88,9 @@ function GameInstallPath(
         if (version && platform) {
             window.ipcRenderer.invoke('get-game-install-path', { version, platform }).then(path => {
                 if (isEmpty(path)) {
-                    setPath(path.trim());
-                } else {
                     message.error('未能自动检测到游戏的安装目录，请手动选择').then();
+                } else {
+                    setPath(path.trim());
                 }
             })
         }

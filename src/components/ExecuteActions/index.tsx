@@ -83,16 +83,17 @@ const ExecuteActions = forwardRef<ExecuteActionsHandler, ExecuteActionsProps>((
             <div className="disclaimer">
                 <div className="disclaimer-title">免责声明</div>
                 <div className="disclaimer-content">
-                    <div>1. 本工具开源免费，<a onClick={openGithub}>开源地址</a></div>
+                    <div>1. 此工具开源免费，<a onClick={openGithub}>开源地址</a></div>
                     <div>2. 任何修改游戏本体的操作都有可能导致封号，由此造成的后果请自行承担</div>
-                    <div>3. 本工具不包含任何恶意行为，例如窃取账号信息、盗号等。不放心的朋友可以阅读源码确认安全后自行编译打包使用
+                    <div>3. 此工具不包含任何恶意行为，例如窃取账号信息、盗号等。不放心的朋友可以阅读源码确认安全后自行编译打包使用
                     </div>
-                    <div>4. 继续使用本工具代表同意此声明</div>
+                    <div>4. 每次游戏更新后补丁和字体等修改都会失效，需要下载新版本补丁安装。（支持判断国服功能补丁是否过期）</div>
+                    <div>5. 继续使用此工具代表同意声明</div>
                 </div>
             </div>
             <div className="execute-result">
                 <div className="execute-result-title">
-                    <span>日志</span>
+                    <span>执行日志</span>
                 </div>
                 <div className="execute-log" ref={logRef}>{executeLog}</div>
             </div>
