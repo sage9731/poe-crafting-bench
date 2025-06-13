@@ -1,11 +1,12 @@
-import { app, BrowserWindow, shell, ipcMain, Menu, dialog } from 'electron'
+import { app, BrowserWindow, shell, ipcMain, Menu, dialog, ipcRenderer } from 'electron'
 import { createRequire } from 'node:module'
 import { fileURLToPath } from 'node:url'
 import path from 'node:path'
 import os from 'node:os'
 import { update } from './update'
 import * as process from "node:process";
-import { exec } from 'child_process';
+import { exec, spawn } from 'child_process';
+import { a9 } from "vitest/dist/chunks/reporters.nr4dxCkA";
 
 const require = createRequire(import.meta.url)
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
@@ -168,17 +169,62 @@ ipcMain.handle('open-patch-file-dialog', async (_, arg) => {
 });
 
 ipcMain.handle('get-game-install-path', async(_, arg) => {
-    console.log(arg);
     const { version, platform } = arg;
     const command = `chcp 65001 >nul && "${POE_BENCH_EXE}" get-game-install-path --version ${version} --platform ${platform}`;
     return await new Promise<string>(resolve => {
-        console.log('command', command)
         exec(command, (error, stdout, stderr) => {
             if (stdout) {
                 resolve(stdout);
             } else {
                 resolve('');
             }
+        })
+    });
+});
+
+ipcMain.handle('get-installed-fonts', async(_, arg) => {
+    const command = `chcp 65001 >nul && "${POE_BENCH_EXE}" get-installed-fonts`;
+    return await new Promise<string>(resolve => {
+        exec(command, (error, stdout, stderr) => {
+            if (stdout) {
+                resolve(JSON.parse(stdout));
+            } else {
+                resolve('[]');
+            }
+        })
+    });
+});
+
+ipcMain.handle('patch', async(_, arg: ExecParam) => {
+    let command = `chcp 65001 >nul && "${POE_BENCH_EXE}" patch`;
+    const { path, patch, font, fontSizeDelta, removeMinimapFog, cameraZoom } = arg;
+    command += ' -p ' + path;
+    if (patch && patch.length > 0) {
+        patch.forEach(p => {
+            command += ' -pf ' + p;
+        });
+    }
+    if (font) {
+        command += ' --font ' + font;
+    }
+    if (fontSizeDelta) {
+        command += ' --font-size-delta ' + fontSizeDelta;
+    }
+    if (removeMinimapFog !== undefined) {
+        command += ' --remove-minimap-fog ' + removeMinimapFog;
+    }
+    if (cameraZoom !== undefined) {
+        command += ' --camera-zoom ' + cameraZoom;
+    }
+    console.log('exec ', command);
+    return await new Promise<any>(resolve => {
+        const child = spawn(command);
+        child.on('close', code => resolve(code));
+        child.stdout.on('data', data => {
+            ipcRenderer.send('execute-log', data);
+        });
+        child.stderr.on('data', data => {
+            ipcRenderer.send('execute-log', data);
         })
     });
 });

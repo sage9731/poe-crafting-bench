@@ -1,80 +1,93 @@
-import './App.css'
+import { useCallback, useMemo, useRef, useState } from "react";
 import { Button, Steps, message } from "antd";
 import { FileZipOutlined, FolderOpenOutlined, FontSizeOutlined, RocketOutlined, SunOutlined } from "@ant-design/icons";
-import { useCallback, useMemo, useState } from "react";
 import { StepProps } from "antd/es/steps";
-import GameInstallPath from "@/components/GameInstallPath";
 import { useLocalStorageState } from "ahooks";
-import PatchPath from "@/components/PatchPath";
 import { isEmpty } from 'lodash';
 
+import GameInstallPath from "@/components/GameInstallPath";
+import PatchPath from "@/components/PatchPath";
+import SelectFont from "@/components/SelectFont";
+import HiddenFeatures from "@/components/HiddenFeatures";
+import ExecuteActions, { ExecuteActionsHandler } from "@/components/ExecuteActions";
+
+import './App.css'
+
 interface CustomStepProps extends StepProps {
-    key: 'path' | 'patch' | 'font' | 'enhance' | 'execute'
+    key: 'path' | 'patch' | 'font' | 'hiddenFeatures' | 'execute'
 }
 
 function App() {
+    const executeRef = useRef<ExecuteActionsHandler>(null);
     const [execParam, setExecParam] = useState<ExecParam>({ path: '' });
+    const [executing, setExecuting] = useState(false);
     const [currentStep, setCurrentStep] = useState<number>(0);
     const [secretClickTimes, setSecretClickTimes] = useState(0);
-    const [enhanceEnabled, setEnhanceEnabled] = useLocalStorageState<boolean>('enhanceEnabled', {
+    const [showHiddenFeatures, setShowHiddenFeatures] = useLocalStorageState<boolean>('showHiddenFeatures', {
         defaultValue: false,
         serializer: value => value.toString(),
         deserializer: value => value === 'true',
     });
     const steps: CustomStepProps[] = useMemo(() => {
+        const disabled = currentStep === 0 && isEmpty(execParam.path) || executing;
         const steps: CustomStepProps[] = [
             {
                 key: 'path',
                 title: '选择游戏目录',
-                icon: <FolderOpenOutlined/>
+                icon: <FolderOpenOutlined/>,
+                disabled: executing,
             },
             {
                 key: 'patch',
                 title: '选择补丁',
                 icon: <FileZipOutlined/>,
+                disabled,
             },
             {
                 key: 'font',
                 title: '选择字体',
                 icon: <FontSizeOutlined/>,
+                disabled,
             }
         ];
-        if (enhanceEnabled) {
+        if (showHiddenFeatures) {
             steps.push({
-                key: 'enhance',
+                key: 'hiddenFeatures',
                 title: '更多功能',
-                icon: <SunOutlined/>
+                icon: <SunOutlined/>,
+                disabled,
             });
         }
         steps.push({
             key: 'execute',
             title: '执行',
-            icon: <RocketOutlined/>
+            icon: <RocketOutlined/>,
+            disabled,
         });
         return steps;
-    }, [enhanceEnabled]);
+    }, [showHiddenFeatures, currentStep, execParam, executing]);
 
     const currentStepKey = steps[currentStep].key;
-
-    const onStepChange = useCallback((step: number) => {
-        setCurrentStep(step);
-    }, []);
 
     const onNext = () => {
         if (currentStep < steps.length - 1) {
             setCurrentStep(prev => prev + 1);
+        } else if (currentStepKey === 'execute') {
+            if (executeRef.current) {
+                executeRef.current.execute(execParam);
+            }
         }
     }
 
     const onSecretClick = useCallback(() => {
-        if (!enhanceEnabled) {
+        if (!showHiddenFeatures) {
             const times = secretClickTimes + 1;
-            if (times < 10) {
+            if (times < 20) {
                 setSecretClickTimes(times);
-                if (times >= 5) {
+                if (times >= 15) {
                     message.success({
                         key: 'secret-click-times',
-                        content: `还差 ${10 - times} 次开启更多功能！`
+                        content: `还差 ${20 - times} 次开启更多功能！`
                     }).then();
                 }
             } else {
@@ -82,10 +95,10 @@ function App() {
                     key: 'secret-click-times',
                     content: '已开启更多功能！'
                 }).then();
-                setEnhanceEnabled(true);
+                setShowHiddenFeatures(true);
             }
         }
-    }, [enhanceEnabled, secretClickTimes]);
+    }, [showHiddenFeatures, secretClickTimes]);
 
     const setExecParamField = useCallback((key: string, value: any) => {
         setExecParam(prev => ({
@@ -94,11 +107,32 @@ function App() {
         }))
     }, []);
 
+    const addExecParam = useCallback((params: any) => {
+        setExecParam(prev => ({
+            ...prev,
+            ...params
+        }));
+    }, []);
+
+    const getMainBtnText = () => {
+        if (currentStepKey === 'execute') {
+            return '执行';
+        }
+        if (currentStepKey === 'patch' && isEmpty(execParam.patch)) {
+            return '跳过';
+        }
+        if (currentStepKey === 'font' && isEmpty(execParam.font) && !execParam.fontSizeDelta) {
+            return '跳过';
+        }
+        return '下一步';
+    }
+
     return (
         <div className='App'>
             <div className="header">
                 <Steps
                     current={currentStep}
+                    onChange={setCurrentStep}
                     items={steps}
                     responsive={false}
                 />
@@ -112,10 +146,19 @@ function App() {
                     visible={currentStepKey === 'patch'}
                     onChange={patch => setExecParamField('patch', patch)}
                 />
+                <SelectFont
+                    visible={currentStepKey === 'font'}
+                    onChange={params => addExecParam(params)}
+                />
+                <HiddenFeatures
+                    visible={currentStepKey === 'hiddenFeatures'}
+                    onChange={params => addExecParam(params)}
+                />
+                <ExecuteActions ref={executeRef} visible={currentStepKey === "execute"} onExecutingChange={setExecuting}/>
             </div>
             <div className="footer">
                 <Button
-                    disabled={currentStep === 0}
+                    disabled={currentStep === 0 || executing}
                     onClick={() => setCurrentStep(prev => prev - 1)}
                 >
                     上一步
@@ -125,8 +168,9 @@ function App() {
                     type="primary"
                     onClick={onNext}
                     disabled={currentStepKey === 'path' && isEmpty(execParam.path)}
+                    loading={executing}
                 >
-                    {currentStep <= steps.length - 2 ? '下一步' : '执行'}
+                    {getMainBtnText()}
                 </Button>
             </div>
         </div>

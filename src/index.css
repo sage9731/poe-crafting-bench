@@ -12,6 +12,10 @@
   -moz-osx-font-smoothing: grayscale;
   -webkit-text-size-adjust: 100%;
   user-select: none;
+
+
+  --unique-color: #af6025;
+  --magic-color: #8888ff;
 }
 
 ::-webkit-scrollbar {

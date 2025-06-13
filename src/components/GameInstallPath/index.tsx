@@ -9,7 +9,8 @@ import PathOfExile1Icon from '../../assets/PathOfExile1.ico';
 import PathOfExile2Icon from '../../assets/PathOfExile2.ico';
 import './index.css';
 import { isEmpty } from "lodash";
-import { useLatest } from "ahooks";
+import { useLatest, useMount } from "ahooks";
+import useLastExecParam from "@/hooks/useLastExecParam";
 
 interface GameInstallPathProps {
     visible: boolean
@@ -62,10 +63,18 @@ function GameInstallPath(
         onChange,
     }: GameInstallPathProps
 ) {
+    const [lastExecParam] = useLastExecParam();
     const [path, setPath] = useState<string>();
     const [version, setVersion] = useState<number>();
     const [platform, setPlatform] = useState<string>();
     const onChangeRef = useLatest(onChange);
+
+    useMount(() => {
+        if (lastExecParam.path) {
+            setPath(lastExecParam.path);
+            onChangeRef.current(lastExecParam.path);
+        }
+    })
 
     const onManualChoose = useCallback(() => {
         window.ipcRenderer.invoke('open-game-file-dialog').then(path => {
@@ -100,7 +109,7 @@ function GameInstallPath(
                 <Flex flex={1}>
                     <Input
                         value={path}
-                        onChange={(e) => setPath(e.target.value)}
+                        disabled
                         placeholder="请选择游戏根目录的 Content.ggpk 或 Bundles2\_.index.bin"
                     />
                 </Flex>

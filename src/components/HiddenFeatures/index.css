@@ -1,0 +1,7 @@
+.hidden-features {
+    padding: 12px 16px;
+
+    &-hint {
+        margin-bottom: 16px;
+    }
+}
