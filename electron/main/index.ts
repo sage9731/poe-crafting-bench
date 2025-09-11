@@ -244,6 +244,7 @@ ipcMain.handle('patch', async (_, arg: ExecParam) => {
     if (cameraZoom !== undefined) {
         command += ' --camera-zoom ' + cameraZoom;
     }
+    win?.webContents.send('execute-log', `${command}`);
     return await new Promise<any>(resolve => {
         const child = spawn(command, [], {
             stdio: 'pipe', // 建立管道（默认值）
