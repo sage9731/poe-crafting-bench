@@ -62,6 +62,10 @@ function SelectFont(
         }
     }, [font, fontSizeDelta])
 
+    const openDotNet8 = useCallback(() => {
+        window.ipcRenderer.invoke('open-external', 'https://aka.ms/dotnet-core-applaunch?framework=Microsoft.NETCore.App&framework_version=8.0.0&arch=x64&rid=win10-x64');
+    }, []);
+
     return (
         <div className={classNames('select-font', { 'hidden': !visible })}>
             <div className="font-list-container">
@@ -118,11 +122,11 @@ function SelectFont(
             </div>
             <div className="font-preview-container">
                 {isEmpty(font) ? (
-                    <div className="font-preview-hint">请在左侧字体列表中选择心仪的字体</div>
+                    <div className="font-preview-hint">请在左侧字体列表中选择心仪的字体。若字体列表为空，请安装<a onClick={openDotNet8}>.net8</a>后重试</div>
                 ) : (
                     <div className="unique-item" style={font ? { fontFamily: font } : {}}>
                         <div className="unique-item-header">
-                            <div className="item-name">法师之血</div>
+                            <div className="item-name">法师之血(仅做演示，同时支持POE1/2)</div>
                             <div className="item-name">重革腰带</div>
                         </div>
                         <div className="unique-item-content">
