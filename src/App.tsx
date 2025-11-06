@@ -147,6 +147,7 @@ function App() {
                     onChange={patch => setExecParamField('patch', patch)}
                 />
                 <SelectFont
+                    patch={execParam.patch}
                     visible={currentStepKey === 'font'}
                     onChange={params => addExecParam(params)}
                 />

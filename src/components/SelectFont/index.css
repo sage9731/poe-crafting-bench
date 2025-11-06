@@ -15,6 +15,7 @@
             overflow-y: auto;
             border: 1px solid #eee;
             border-radius: 4px;
+            padding-top: 4px;
 
             .font-list-item {
                 cursor: pointer;

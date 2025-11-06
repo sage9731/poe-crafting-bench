@@ -1,9 +1,9 @@
 {
   "name": "poe-bench",
-  "version": "1.0.2",
+  "version": "1.0.4",
   "main": "dist-electron/main/index.js",
   "description": "Electron Vite React boilerplate.",
-  "author": "草鞋没号 <308487730@qq.com>",
+  "author": "Sage <sagezheng@outlook.com>",
   "license": "MIT",
   "private": true,
   "debug": {
