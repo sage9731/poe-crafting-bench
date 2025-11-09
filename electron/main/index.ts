@@ -202,7 +202,8 @@ ipcMain.handle('open-external', (_, url: string): void => {
 })
 
 ipcMain.handle('patch', async (_, arg: ExecParam) => {
-    let { path, patch = [], font, fontSizeDelta, removeMinimapFog, cameraZoom } = arg;
+    console.log(arg);
+    let { path, patch = [], font, fontSizeDelta, removeFog, minimapVisibility, cameraZoom } = arg;
     // 判断是不是国服，国服版本号是否与补丁版本号一致
     try {
         const functionPatch = patch.find(p => p.includes('功能补丁'));
@@ -238,8 +239,11 @@ ipcMain.handle('patch', async (_, arg: ExecParam) => {
     if (fontSizeDelta) {
         command += ' --font-size-delta ' + fontSizeDelta;
     }
-    if (removeMinimapFog !== undefined) {
-        command += ' --remove-minimap-fog ' + removeMinimapFog;
+    if (removeFog !== undefined) {
+        command += ` --remove-fog ${removeFog}`;
+    }
+    if (minimapVisibility !== undefined) {
+        command += ' --minimap-visibility ' + minimapVisibility;
     }
     if (cameraZoom !== undefined) {
         command += ' --camera-zoom ' + cameraZoom;

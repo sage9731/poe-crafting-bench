@@ -4,6 +4,7 @@ interface ExecParam {
     patch?: string[]
     font?: string
     fontSizeDelta?: number
-    removeMinimapFog?: boolean
+    removeFog?: boolean
+    minimapVisibility?: boolean
     cameraZoom?: number
 }

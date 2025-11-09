@@ -2,10 +2,11 @@ import React, { useCallback } from 'react';
 import { Alert, Flex, Form, Radio, Slider, Switch } from "antd";
 import classNames from "classnames";
 import './index.css';
+import ToggleableFeature from '@/components/HiddenFeatures/ToggleableFeature';
 
 interface HiddenFeaturesProps {
     visible: boolean
-    onChange: (params: Pick<ExecParam, 'removeMinimapFog' | 'cameraZoom'>) => void
+    onChange: (params: Pick<ExecParam, 'removeFog' | 'minimapVisibility' | 'cameraZoom'>) => void
 }
 
 function HiddenFeatures(
@@ -15,14 +16,20 @@ function HiddenFeatures(
     }: HiddenFeaturesProps
 ) {
     const [form] = Form.useForm();
-    const enableRemoveMinimapFog = Form.useWatch('enableRemoveMinimapFog', form);
-    const enableCameraZoom = Form.useWatch('enableCameraZoom', form);
     const cameraZoom = Form.useWatch('cameraZoom', form);
 
     const onValuesChange = useCallback((changedValues: any, values: any) => {
-        const { enableRemoveMinimapFog, removeMinimapFog, enableCameraZoom, cameraZoom } = values;
+        const {
+            enableRemoveFog,
+            removeFog,
+            enableMinimapVisibility,
+            minimapVisibility,
+            enableCameraZoom,
+            cameraZoom
+        } = values;
         onChange({
-            removeMinimapFog: enableRemoveMinimapFog ? removeMinimapFog : undefined,
+            removeFog: enableRemoveFog ? removeFog : undefined,
+            minimapVisibility: enableMinimapVisibility ? minimapVisibility : undefined,
             cameraZoom: enableCameraZoom ? cameraZoom : undefined,
         })
     }, [onChange]);
@@ -42,53 +49,43 @@ function HiddenFeatures(
             <Form
                 form={form}
                 initialValues={{
-                    enableRemoveMinimapFog: false,
-                    removeMinimapFog: true,
+                    enableRemoveFog: false,
+                    removeFog: true,
+                    enableMinimapVisibility: false,
+                    minimapVisibility: true,
                     enableCameraZoom: false,
                     cameraZoom: 1
                 }}
                 onValuesChange={onValuesChange}
             >
-                <Form.Item
-                    name="removeMinimapFog"
+                <ToggleableFeature label="去除雾气" enableFieldName="enableRemoveFog">
+                    <Form.Item name="removeFog" noStyle>
+                        <Radio.Group>
+                            <Radio value={true}>启用</Radio>
+                            <Radio value={false}>禁用</Radio>
+                        </Radio.Group>
+                    </Form.Item>
+                </ToggleableFeature>
+                <ToggleableFeature
                     label="小地图全开"
+                    enableFieldName="enableMinimapVisibility"
                 >
-                    <Flex gap={16} align="center">
-                        <Form.Item name="enableRemoveMinimapFog" noStyle>
-                            <Switch checkedChildren="无视风险" unCheckedChildren="保持原样"/>
-                        </Form.Item>
-                        {
-                            enableRemoveMinimapFog && (
-                                <Form.Item name="removeMinimapFog" noStyle>
-                                    <Radio.Group>
-                                        <Radio value={true}>启用</Radio>
-                                        <Radio value={false}>禁用</Radio>
-                                    </Radio.Group>
-                                </Form.Item>
-                            )
-                        }
-                    </Flex>
-
-                </Form.Item>
-                <Form.Item
+                    <Form.Item name="minimapVisibility" noStyle>
+                        <Radio.Group>
+                            <Radio value={true}>启用</Radio>
+                            <Radio value={false}>禁用</Radio>
+                        </Radio.Group>
+                    </Form.Item>
+                </ToggleableFeature>
+                <ToggleableFeature
                     label="视距倍数"
+                    enableFieldName="enableCameraZoom"
                 >
-                    <Flex gap={8} align="center">
-                        <Form.Item name="enableCameraZoom" noStyle>
-                            <Switch checkedChildren="无视风险" unCheckedChildren="保持原样"/>
-                        </Form.Item>
-                        {
-                            enableCameraZoom && (
-                                <>
-                                    <Form.Item name="cameraZoom" noStyle>
-                                        <Slider style={{ width: 300 }} min={1} max={3} step={0.1}/>
-                                    </Form.Item>
-                                    <span>{cameraZoom}倍</span>
-                                </>
-                            )
-                        }
-                    </Flex>
-                </Form.Item>
+                    <Form.Item name="cameraZoom" noStyle>
+                        <Slider style={{ width: 300 }} min={1} max={3} step={0.1}/>
+                    </Form.Item>
+                    <span>{cameraZoom}倍</span>
+                </ToggleableFeature>
             </Form>
         </div>
     );

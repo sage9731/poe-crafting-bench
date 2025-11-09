@@ -42,8 +42,8 @@ const ExecuteActions = forwardRef<ExecuteActionsHandler, ExecuteActionsProps>((
 
     useImperativeHandle<ExecuteActionsHandler, ExecuteActionsHandler>(ref, (): ExecuteActionsHandler => ({
         execute: (execParam: ExecParam) => {
-            const { patch, font, fontSizeDelta, removeMinimapFog, cameraZoom } = execParam;
-            if (isEmpty(patch) && isEmpty(font) && !fontSizeDelta && removeMinimapFog === undefined && cameraZoom === undefined) {
+            const { patch, font, fontSizeDelta, minimapVisibility, cameraZoom } = execParam;
+            if (isEmpty(patch) && isEmpty(font) && !fontSizeDelta && minimapVisibility === undefined && cameraZoom === undefined) {
                 message.error('当前没有配置任何可以执行的内容').then();
                 return;
             }
