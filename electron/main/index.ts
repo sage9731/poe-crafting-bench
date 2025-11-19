@@ -203,7 +203,7 @@ ipcMain.handle('open-external', (_, url: string): void => {
 
 ipcMain.handle('patch', async (_, arg: ExecParam) => {
     console.log(arg);
-    let { path, patch = [], font, fontSizeDelta, removeFog, minimapVisibility, cameraZoom } = arg;
+    let { path, patch = [], font, fontSizeDelta, removeFog, minimapVisibility, cameraZoom, lightUp } = arg;
     // 判断是不是国服，国服版本号是否与补丁版本号一致
     try {
         const functionPatch = patch.find(p => p.includes('功能补丁'));
@@ -247,6 +247,9 @@ ipcMain.handle('patch', async (_, arg: ExecParam) => {
     }
     if (cameraZoom !== undefined) {
         command += ' --camera-zoom ' + cameraZoom;
+    }
+    if (lightUp !== undefined) {
+        command += ' --light-up ' + lightUp;
     }
     win?.webContents.send('execute-log', `${command}`);
     return await new Promise<any>(resolve => {

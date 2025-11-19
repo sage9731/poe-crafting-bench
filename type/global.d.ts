@@ -7,4 +7,5 @@ interface ExecParam {
     removeFog?: boolean
     minimapVisibility?: boolean
     cameraZoom?: number
+    lightUp?: number
 }

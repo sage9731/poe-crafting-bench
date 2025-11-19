@@ -2,6 +2,31 @@
     padding: 12px 16px;
 
     &-hint {
-        margin-bottom: 16px;
+        margin-bottom: 8px;
+    }
+
+    .ant-form-item {
+        margin-bottom: 8px;
+
+        .ant-form-item-control-input-content {
+            > .ant-flex-align-center {
+                align-items: baseline !important;
+            }
+        }
+    }
+}
+
+.light-up-example {
+    .ant-tooltip {
+        max-width: 800px;
+    }
+
+    &-imgs {
+        display: flex;
+
+        img {
+            height: 150px;
+            width: 324px;
+        }
     }
 }

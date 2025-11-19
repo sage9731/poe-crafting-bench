@@ -1,12 +1,15 @@
 import React, { useCallback } from 'react';
-import { Alert, Flex, Form, Radio, Slider, Switch } from "antd";
+import { Alert, Form, Radio, Slider, Tooltip } from "antd";
 import classNames from "classnames";
 import './index.css';
 import ToggleableFeature from '@/components/HiddenFeatures/ToggleableFeature';
+import AfterLightUp from '@/assets/after_light_up.png';
+import BeforeLightUp from '@/assets/before_light_up.png';
+import useLastExecParam from '@/hooks/useLastExecParam';
 
 interface HiddenFeaturesProps {
     visible: boolean
-    onChange: (params: Pick<ExecParam, 'removeFog' | 'minimapVisibility' | 'cameraZoom'>) => void
+    onChange: (params: Pick<ExecParam, 'removeFog' | 'minimapVisibility' | 'cameraZoom' | 'lightUp'>) => void
 }
 
 function HiddenFeatures(
@@ -15,8 +18,10 @@ function HiddenFeatures(
         onChange,
     }: HiddenFeaturesProps
 ) {
+    const [lastExecParam] = useLastExecParam();
     const [form] = Form.useForm();
     const cameraZoom = Form.useWatch('cameraZoom', form);
+    const lightUp = Form.useWatch('lightUp', form);
 
     const onValuesChange = useCallback((changedValues: any, values: any) => {
         const {
@@ -25,12 +30,15 @@ function HiddenFeatures(
             enableMinimapVisibility,
             minimapVisibility,
             enableCameraZoom,
-            cameraZoom
+            cameraZoom,
+            enableLightUp,
+            lightUp,
         } = values;
         onChange({
             removeFog: enableRemoveFog ? removeFog : undefined,
             minimapVisibility: enableMinimapVisibility ? minimapVisibility : undefined,
             cameraZoom: enableCameraZoom ? cameraZoom : undefined,
+            lightUp: enableLightUp ? lightUp : undefined,
         })
     }, [onChange]);
 
@@ -54,18 +62,12 @@ function HiddenFeatures(
                     enableMinimapVisibility: false,
                     minimapVisibility: true,
                     enableCameraZoom: false,
-                    cameraZoom: 1
+                    cameraZoom: lastExecParam.cameraZoom || 1.5,
+                    enableLightUp: false,
+                    lightUp: lastExecParam.lightUp || 0.5,
                 }}
                 onValuesChange={onValuesChange}
             >
-                <ToggleableFeature label="去除雾气" enableFieldName="enableRemoveFog">
-                    <Form.Item name="removeFog" noStyle>
-                        <Radio.Group>
-                            <Radio value={true}>启用</Radio>
-                            <Radio value={false}>禁用</Radio>
-                        </Radio.Group>
-                    </Form.Item>
-                </ToggleableFeature>
                 <ToggleableFeature
                     label="小地图全开"
                     enableFieldName="enableMinimapVisibility"
@@ -82,9 +84,39 @@ function HiddenFeatures(
                     enableFieldName="enableCameraZoom"
                 >
                     <Form.Item name="cameraZoom" noStyle>
-                        <Slider style={{ width: 300 }} min={1} max={3} step={0.1}/>
+                        <Slider style={{ width: 480 }} min={1} max={3} step={0.1}
+                                marks={{ 1: '还原', 1.5: '建议值 1.5' }}/>
                     </Form.Item>
                     <span>{cameraZoom}倍</span>
+                </ToggleableFeature>
+                <ToggleableFeature label="去除雾气" enableFieldName="enableRemoveFog">
+                    <Form.Item name="removeFog" noStyle>
+                        <Radio.Group>
+                            <Radio value={true}>启用</Radio>
+                            <Radio value={false}>禁用</Radio>
+                        </Radio.Group>
+                    </Form.Item>
+                </ToggleableFeature>
+                <ToggleableFeature label="点亮环境" enableFieldName="enableLightUp">
+                    <Form.Item name="lightUp" noStyle>
+                        <Slider style={{ width: 360 }} min={0} max={3} step={0.1}
+                                marks={{ 0: '还原', 0.5: '建议值 0.5' }}/>
+                    </Form.Item>
+                    <span>{lightUp === 0 ? '还原' : `最小光亮 ${lightUp}`}</span>
+                    <div className="light-up-example">
+                        <Tooltip
+                            getPopupContainer={triggerNode => triggerNode.parentElement || document.body}
+                            trigger={['hover', 'click']}
+                            title={(
+                                <div className="light-up-example-imgs">
+                                    <img src={BeforeLightUp}/>
+                                    <img src={AfterLightUp}/>
+                                </div>
+                            )}
+                        >
+                            <span style={{ cursor: 'pointer', color: '#1677ff' }}>查看效果图</span>
+                        </Tooltip>
+                    </div>
                 </ToggleableFeature>
             </Form>
         </div>
