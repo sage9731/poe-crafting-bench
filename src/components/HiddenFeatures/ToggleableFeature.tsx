@@ -19,9 +19,11 @@ const ToggleableFeature: React.FC<ToggleableFeatureProps> = ({
         <Form.Item label={label}>
             <Flex gap={16} align="center">
                 <Form.Item name={enableFieldName} noStyle>
-                    <Switch checkedChildren="无视风险" unCheckedChildren="保持原样" />
+                    <Switch checkedChildren="无视风险" unCheckedChildren="保持原样"/>
                 </Form.Item>
-                {enabled && children}
+                <div style={{ display: enabled ? 'flex' : 'none', alignItems: 'baseline', gap: 8 }}>
+                    {children}
+                </div>
             </Flex>
         </Form.Item>
     );

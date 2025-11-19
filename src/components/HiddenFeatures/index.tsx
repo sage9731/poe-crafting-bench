@@ -1,5 +1,5 @@
 import React, { useCallback } from 'react';
-import { Alert, Form, Radio, Slider, Tooltip } from "antd";
+import { Alert, Form, message, Radio, Slider, Tooltip } from "antd";
 import classNames from "classnames";
 import './index.css';
 import ToggleableFeature from '@/components/HiddenFeatures/ToggleableFeature';
